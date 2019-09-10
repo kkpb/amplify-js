@@ -23,14 +23,26 @@
         <div v-if="signUpField.key !== 'phone_number'">
           <div v-bind:class="amplifyUI.inputLabel">{{$Amplify.I18n.get(signUpField.label)}} {{signUpField.required ? '*': ''}}</div>
           <input
-              :type = "signUpField.type"
-              v-bind:class="[amplifyUI.input, signUpField.invalid ? 'invalid': '']"
-              v-model="signUpField.value"
-              :placeholder="$Amplify.I18n.get(signUpField.label)"
-              v-on:change="clear(signUpField)"
-              v-bind:data-test="auth.signUp.nonPhoneNumberInput"
+            v-if="signUpField.type === checkbox"
+            :type = "signUpField.type"
+            v-bind:class="[amplifyUI.input, signUpField.invalid ? 'invalid': '']"
+            v-model="signUpField.value"
+            :true-value="signUpField.true-value"
+            :false-value="signUpField.false-value"
+            :placeholder="$Amplify.I18n.get(signUpField.label)"
+            v-on:change="clear(signUpField)"
+            v-bind:data-test="auth.signUp.nonPhoneNumberInput"
             />
-          </div>
+          <input
+            v-else
+            :type = "signUpField.type"
+            v-bind:class="[amplifyUI.input, signUpField.invalid ? 'invalid': '']"
+            v-model="signUpField.value"
+            :placeholder="$Amplify.I18n.get(signUpField.label)"
+            v-on:change="clear(signUpField)"
+            v-bind:data-test="auth.signUp.nonPhoneNumberInput"
+            />
+        </div>
         <div v-if="signUpField.key === 'phone_number'">
           <amplify-phone-field 
             v-bind:required="signUpField.required"
@@ -183,7 +195,11 @@ export default {
           user.attributes.phone_number = e.value;
         } else {
           const newKey = `${this.needPrefix(e.key) ? 'custom:' : ''}${e.key}`;
-          user.attributes[newKey] = e.value;
+          if (e.type === 'checkbox') {
+            user.attributes[newKey] = e.value ? e['true-value'] : e['false-value'];
+          } else {
+            user.attributes[newKey] = e.value;
+          }
         };
       });
 
